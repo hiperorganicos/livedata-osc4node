@@ -1,0 +1,11 @@
+{
+    "name": "osc4node-example"
+  , "private": true
+  , "description": "example with osc4node"
+  , "version": "0.0.1"
+  , "dependencies": {
+        "express": "2.5.x"
+      , "jade": "0.x"
+      , "socket.io": "0.8.x"
+    }
+}
