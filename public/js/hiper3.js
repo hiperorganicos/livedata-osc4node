@@ -9,6 +9,7 @@ $(function() {
 
     var socket = io.connect();
     var txt = "";
+    var res = 100;
 
     window.APP = APP;
 
@@ -67,7 +68,7 @@ $(function() {
             node.params[param] = { val: [], c : 0 };
         }
         node.params[param].val[node.params[param].c] = args[0].value;
-        node.params[param].c = (node.params[param].c + 1) % 200;
+        node.params[param].c = (node.params[param].c + 1) % (res+1);
     }
 
     function sketchProc(processing) {
@@ -86,34 +87,46 @@ $(function() {
 
             processing.background(0);
 
-            var h = 20;
+            var row = 0;
+            var h = 50;
+            var gap = 30;
             var uniqcolor = 0;
 
             for (var i = 0; i < APP.nodesname.length; i++) {
                 var node = APP.nodes[APP.nodesname[i]];
-                processing.fill(goodcolor(uniqcolor));
-                processing.textFont(mono, 24);
-                processing.text( APP.nodesname[i], 0, h );
                 for (var j = node.paramsname.length - 1; j >= 0; j--) {
                     var param = node.paramsname[j];
                     var val = node.params[param].val;
                     var c = node.params[param].c;
                     processing.fill(goodcolor(uniqcolor));
                     processing.textFont(mono); 
-                    processing.text( node.paramsname[j] + '     ' + val[c-1], 100, h);
-                    h += 20;
-                    for(var k = 1; k < 200; k++){
-                        processing.stroke(goodcolor(uniqcolor));
-                        processing.strokeWeight(1);
+                    processing.text( node.paramsname[j], 0, gap);
+                    processing.text( ''+dec(val[c > 0 ? c-1 : 0]), 150, gap);
+                    processing.stroke(50);
+                    processing.line(200, row * h + h / 2, 960, row * h + h / 2);
+                    for(var k = 1; k < res; k++){
+                        if(k > c-1){
+                            processing.stroke(30);
+                        } else {
+                            processing.stroke(goodcolor(uniqcolor));
+                        }
+                        
                         if(val[k]){
-                            processing.line(200+760/200*(k-1), i*100 + 100*val[k-1], 200+760/200*(k), i*100 + 100*val[k]);
+                            processing.line(
+                                200 + 760 / (res-1) * (k-1),
+                                row * h + h * val[k-1],
+                                200 + 760 / (res-1) * (k),
+                                row * h + h * val[k]
+                            );
                         }
                     }
-                    processing.ellipse( 200+760/200*(c-1), i*100 + 100*val[c-1], 5, 5);
-                    uniqcolor+=2.5;
+                    if(c > 0){
+                        processing.ellipse( 200 + 760 / (res-1) * (c-1), row * h + h * val[c-1], 5, 5);
+                    }
+                    uniqcolor += 2.5;
+                    gap += 50;
+                    row++;
                 };
-                uniqcolor += 3;
-                h += 100;
             }
             
            
@@ -125,6 +138,14 @@ $(function() {
             var g = ( Math.sin(frequency * col + 2) * 127 + 128 );
             var b = ( Math.sin(frequency * col + 4) * 127 + 128 );
             return processing.color(r,g,b);
+        }
+
+
+        function dec(n){
+            if( n == NaN ){
+                return 0;
+            }
+            return parseInt(n * 1000) / 1000;
         }
     }
 
