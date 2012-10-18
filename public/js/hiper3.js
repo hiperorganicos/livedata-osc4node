@@ -65,10 +65,11 @@ $(function() {
         }
         if(!node.params[param]){
             node.paramsname.push(param);
-            node.params[param] = { val: [], c : 0 };
+            node.params[param] = { val: [], c : 0, idle : 0 };
         }
         node.params[param].val[node.params[param].c] = args[0].value;
         node.params[param].c = (node.params[param].c + 1) % (res+1);
+        node.params[param].idle = 0;
     }
 
     function sketchProc(processing) {
@@ -91,6 +92,7 @@ $(function() {
             var h = 50;
             var gap = 30;
             var uniqcolor = 0;
+            var removeafter = [];
 
             for (var i = 0; i < APP.nodesname.length; i++) {
                 var node = APP.nodes[APP.nodesname[i]];
@@ -98,38 +100,47 @@ $(function() {
                     var param = node.paramsname[j];
                     var val = node.params[param].val;
                     var c = node.params[param].c;
-                    processing.fill(goodcolor(uniqcolor));
-                    processing.textFont(mono); 
-                    processing.text( node.paramsname[j], 0, gap);
-                    processing.text( ''+dec(val[c > 0 ? c-1 : 0]), 150, gap);
-                    processing.stroke(50);
-                    processing.line(200, row * h + h / 2, 960, row * h + h / 2);
-                    for(var k = 1; k < res; k++){
-                        if(k > c-1){
-                            processing.stroke(30);
-                        } else {
-                            processing.stroke(goodcolor(uniqcolor));
+                    node.params[param].idle++;
+                    if(node.params[param].idle > 900) {
+                        //delete APP.nodes[APP.nodesname[i]];
+                        APP.nodesname.splice(i,0);
+                        removeafter.push(i);
+                    } else {
+                        processing.fill(goodcolor(uniqcolor));
+                        processing.textFont(mono); 
+                        processing.text( node.paramsname[j], 0, gap);
+                        processing.text( ''+dec(val[c > 0 ? c-1 : 0]), 150, gap);
+                        processing.stroke(50);
+                        processing.line(200, row * h + h / 2, 960, row * h + h / 2);
+                        for(var k = 1; k < res; k++){
+                            if(k > c-1){
+                                processing.stroke(30);
+                            } else {
+                                processing.stroke(goodcolor(uniqcolor));
+                            }
+                            
+                            if(val[k]){
+                                processing.line(
+                                    200 + 760 / (res-1) * (k-1),
+                                    row * h + h * val[k-1],
+                                    200 + 760 / (res-1) * (k),
+                                    row * h + h * val[k]
+                                );
+                            }
                         }
-                        
-                        if(val[k]){
-                            processing.line(
-                                200 + 760 / (res-1) * (k-1),
-                                row * h + h * val[k-1],
-                                200 + 760 / (res-1) * (k),
-                                row * h + h * val[k]
-                            );
+                        if(c > 0){
+                            processing.ellipse( 200 + 760 / (res-1) * (c-1), row * h + h * val[c-1], 5, 5);
                         }
+                        uniqcolor += 2.5;
+                        gap += 50;
+                        row++;
                     }
-                    if(c > 0){
-                        processing.ellipse( 200 + 760 / (res-1) * (c-1), row * h + h * val[c-1], 5, 5);
-                    }
-                    uniqcolor += 2.5;
-                    gap += 50;
-                    row++;
-                };
+                }
             }
             
-           
+           /*for( var s = 0 ; s < removeafter.length; s++ ) {
+             APP.nodesname.splice(removeafter[s],0);
+           }*/
         };
 
         function goodcolor(col){
