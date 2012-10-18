@@ -1,7 +1,7 @@
 var express = require('express')
   , fs = require('fs')
   , socket = require('socket.io')
-  , osc = require('../lib/osc4node');
+  , osc = require('./lib/osc4node');
 
 /***********************************************************/
 var app = module.exports = express.createServer();
