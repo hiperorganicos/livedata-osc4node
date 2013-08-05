@@ -1,10 +1,11 @@
 var express = require('express')
+  , app = express()
+  , http = require('http')
   , fs = require('fs')
-  , socket = require('socket.io')
-  , osc = require('./lib/osc4node');
+  , server = http.createServer(app)
+  , osc = require('node-osc');
 
 /***********************************************************/
-var app = module.exports = express.createServer();
 
 app.configure(function(){
     app.set('views', __dirname + '/views');
@@ -25,25 +26,14 @@ app.configure('production', function(){
 
 app.get('/', function(req, res){
     res.render('hiper3', {
-        title: 'hip3rorganicos osc viz',
+        title: 'hiperorganicos osc viz',
         app_js: 'hiper3'
     });
 });
 
-app.get('/example', function(req, res){
-    res.render('index', {
-        title: 'node4osc client demo'
-    });
-});
-
-app.listen(3000);
-console.log("Express server listening in %s mode", app.settings.env);
-
-/***********************************************************/
-
 var oscServer
   , oscClient
-  , io = socket.listen(app);
+  , io = require('socket.io').listen(server)
 
 oscServer = new osc.Server(22244, 'localhost');
 oscClient = new osc.Client('localhost', 22243);
@@ -52,22 +42,15 @@ console.log(oscClient);
 
 // bind callbacks.
 io.sockets.on('connection', function(client) {
-    
-    oscServer.on('oscmessage', function(msg, rinfo) {
-        client.emit('oscmessage', {
-            address: msg.address
-          , typetag: msg.typetag
-          , args: msg.arguments
+    oscServer.on('message', function(msg, rinfo) {
+        console.log(msg);
+        client.emit('message', {
+            address: msg[0]
+          , args: msg[1]
         });
     });
-    //*/
-/*
-    var contador = 0;
-    function test(){
-        contador++;
-        client.emit('test',contador)
-        setTimeout(test,1000);
-    }
-    test();
-    //*/
 });
+
+
+server.listen(3000);
+console.log("Express server listening in %s mode", app.settings.env);

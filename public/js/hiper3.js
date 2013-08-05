@@ -7,7 +7,7 @@ $(function() {
         nodesname : []
     };
 
-    var socket = io.connect();
+    var socket = io.connect('http://localhost');
     var txt = "";
     var res = 100;
 
@@ -22,7 +22,7 @@ $(function() {
         notify('System Connected '+msg);
     });
 
-    socket.on('oscmessage', function(msg) {
+    socket.on('message', function(msg) {
         if(msg.address === "/groupclient/ping"){
             notify(msg.args[0].value + " pingando!");
         } else {
@@ -45,7 +45,8 @@ $(function() {
 
     function viz(addr,args){
         
-        txt = addr + " /// " + args[0].value;
+        //console.log(args);
+        txt = addr + " /// " + args;
         
         var addr_a = addr.split('/');
         var nodename = addr_a[1];
@@ -67,7 +68,7 @@ $(function() {
             node.paramsname.push(param);
             node.params[param] = { val: [], c : 0, idle : 0 };
         }
-        node.params[param].val[node.params[param].c] = args[0].value;
+        node.params[param].val[node.params[param].c] = args;
         node.params[param].c = (node.params[param].c + 1) % (res+1);
         node.params[param].idle = 0;
     }
