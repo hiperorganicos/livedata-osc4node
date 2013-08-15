@@ -7,7 +7,7 @@ $(function() {
         nodesname : []
     };
 
-    var socket = io.connect('http://localhost');
+    var socket = io.connect('http://146.164.80.55:3000');
     var txt = "";
     var res = 100;
 
