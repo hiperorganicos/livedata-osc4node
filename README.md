@@ -6,6 +6,10 @@ You have to start both OscGroupServer and OscGroupClient on your computer.
 
 The node.js app listen `22244` port and get all incoming messages.
 
+![](./public/img/node-oscgroups.png)
+
+### instructions
+
 
 Install node.js and npm then access the directory and run:
 
